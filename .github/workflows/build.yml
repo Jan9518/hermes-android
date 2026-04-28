@@ -1,26 +1,37 @@
-
 name: Android Build
+
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: set up JDK 17
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: 'gradle'
+
+      - name: Generate Gradle Wrapper
+        run: |
+          cd hermes-android-bridge
+          gradle wrapper --gradle-version 8.9
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x hermes-android-bridge/gradlew
+
       - name: Build with Gradle
         run: |
-          chmod +x hermes-android-bridge/gradlew
-          hermes-android-bridge/gradlew assembleDebug
-        working-directory: hermes-android-bridge
+          cd hermes-android-bridge
+          ./gradlew assembleDebug
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
